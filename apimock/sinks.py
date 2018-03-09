@@ -1,9 +1,11 @@
 import json
-import logging
-
+from logging import getLogger
 import falcon
 
 from apimock.response import SimpleResponseProcessor
+
+debug_log = getLogger('debugger')
+log = getLogger()
 
 
 class FolderBasedSink:
@@ -11,25 +13,25 @@ class FolderBasedSink:
         self._data_root = data_root
 
     def __call__(self, req, resp):
-        logging.info('Processing request: %s', req.relative_uri)
+        log.info('Processing request: %s', req.relative_uri)
 
         uri = req.relative_uri.rstrip(req.query_string).rstrip('?').lstrip('/')
-        logging.debug('URI: %s', uri or '/')
+        debug_log.debug('URI: %s', uri or '/')
 
         if uri:
             path = self._data_root / uri
         else:
             path = self._data_root
-        logging.debug('PATH: %s', path)
+            debug_log.debug('PATH: %s', path)
 
         file_name = req.method.lower() + '.json'
-        logging.debug('FILE_NAME: %s', file_name)
+        debug_log.debug('FILE_NAME: %s', file_name)
 
         if not path.exists():
             raise falcon.HTTPNotFound()
 
         file_path = path / file_name
-        logging.debug('FILE_PATH: %s', file_path)
+        debug_log.debug('FILE_PATH: %s', file_path)
 
         if not file_path.is_file():
             file_list = []
@@ -46,5 +48,6 @@ class FolderBasedSink:
             data = json.load(f)
 
         response_data = data.get('response', dict())
+
         processor = SimpleResponseProcessor()
         processor.process_response(resp, response_data)

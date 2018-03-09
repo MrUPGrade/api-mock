@@ -1,9 +1,18 @@
+import logging
+
 import falcon
 import os
 
 from pathlib import Path
 
 from apimock.sinks import FolderBasedSink
+
+
+def setup_logger():
+    logging.basicConfig(level=logging.DEBUG)
+
+    debugger = logging.getLogger('debugger')
+    debugger.setLevel(logging.DEBUG)
 
 
 def bootstrap_api():

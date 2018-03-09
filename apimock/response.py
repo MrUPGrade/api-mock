@@ -1,6 +1,7 @@
 import falcon
 import logging
 
+
 class SimpleResponseProcessor:
     def process_response(self, response, response_data):
         logging.debug('RESPONSE: %s', response_data)

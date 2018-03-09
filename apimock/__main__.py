@@ -2,11 +2,11 @@ import logging
 
 from wsgiref.simple_server import make_server
 
-from apimock.bootstrap import bootstrap_api
+from apimock.bootstrap import bootstrap_api, setup_logger
 
-logging.basicConfig(level=logging.DEBUG)
+setup_logger()
 
-api = bootstrap_api()
+app = bootstrap_api()
 
-server = make_server('0.0.0.0', 8080, api)
+server = make_server('0.0.0.0', 8080, app)
 server.serve_forever()
