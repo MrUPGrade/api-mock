@@ -56,5 +56,5 @@ api.add_sink(sink=sink, prefix='/')
 if __name__ == '__main__':
     from wsgiref.simple_server import make_server
 
-    server = make_server('0.0.0.0', 8000, api)
+    server = make_server('0.0.0.0', 8080, api)
     server.serve_forever()
