@@ -4,7 +4,7 @@ import falcon
 
 from apimock.response import SimpleResponseProcessor
 
-debug_log = getLogger('debugger')
+debug_log = getLogger('debug')
 log = getLogger()
 
 
