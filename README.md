@@ -1,9 +1,14 @@
-# api-mock
+# apimock
 
-Simple REST api mock.
+Simple REST API mock.
 
 # Run
 
 ```
-python apimock.py
+export PYTHOPATH=$(pwd)
+python -m apimock
 ```
+
+# License
+
+MIT
