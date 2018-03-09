@@ -1,23 +1,20 @@
 import json
 import logging
+
 import falcon
 
-from pathlib import Path
-
-logging.basicConfig(level=logging.DEBUG)
-
-api = falcon.API()
-
-mock_folder = Path(__file__).parent / 'mock_data'
+from apimock.response import SimpleResponseProcessor
 
 
-class ApiSink:
+class FolderBasedSink:
     def __init__(self, data_root):
         self._data_root = data_root
 
     def __call__(self, req, resp):
-        uri = req.relative_uri.lstrip('/')
-        logging.debug('URI: %s', uri)
+        logging.info('Processing request: %s', req.relative_uri)
+
+        uri = req.relative_uri.rstrip(req.query_string).rstrip('?').lstrip('/')
+        logging.debug('URI: %s', uri or '/')
 
         if uri:
             path = self._data_root / uri
@@ -31,11 +28,12 @@ class ApiSink:
         if not path.exists():
             raise falcon.HTTPNotFound()
 
-        path = path / file_name
+        file_path = path / file_name
+        logging.debug('FILE_PATH: %s', file_path)
 
-        if not path.is_file():
+        if not file_path.is_file():
             file_list = []
-            for file in path.parent.glob('*.json'):
+            for file in file_path.parent.glob('*.json'):
                 file = str(file.parts[-1]).rstrip('.json')
                 file_list.append(file)
 
@@ -44,17 +42,9 @@ class ApiSink:
             else:
                 raise falcon.HTTPNotFound()
 
-        with path.open() as f:
+        with file_path.open() as f:
             data = json.load(f)
 
-        resp.media = data['response']
-
-
-sink = ApiSink(mock_folder)
-api.add_sink(sink=sink, prefix='/')
-
-if __name__ == '__main__':
-    from wsgiref.simple_server import make_server
-
-    server = make_server('0.0.0.0', 8080, api)
-    server.serve_forever()
+        response_data = data.get('response', dict())
+        processor = SimpleResponseProcessor()
+        processor.process_response(resp, response_data)

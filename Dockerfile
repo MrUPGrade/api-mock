@@ -1,13 +1,13 @@
 FROM python:3.6-stretch
 
-RUN mkdir -p /src && \
-    pip install --no-cache-dir falcon
+ADD requirements.txt /
+RUN pip install --no-cache-dir -r /requirements.txt
 
-COPY apimock.py /src/
-
-WORKDIR /src
+VOLUME /mock/
 ENV PYTHONPATH /src
 
 EXPOSE 8080
 
-CMD ["python", "apimock.py"]
+ADD apimock /src/apimock
+
+CMD ["python", "-m", "apimock"]

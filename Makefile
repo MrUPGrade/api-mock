@@ -11,7 +11,10 @@ docker-push:
 	$(DOCKER) push mrupgrade/api-mock:latest
 
 docker-run:
-	$(DOCKER) run -it -p 8080:8080 -v $(PWD)/mock_data:/src/mock_data/ mrupgrade/api-mock:latest
+	$(DOCKER) run -it -p 8080:8080 -v $(PWD)/mock/:/mock/ mrupgrade/api-mock:latest
+
+docker-debug:
+	$(DOCKER) run -it -p 8080:8080 -v $(PWD)/mock/:/mock/ mrupgrade/api-mock:latest /bin/bash
 
 app-run:
 	$(PYTHON) apimock.py

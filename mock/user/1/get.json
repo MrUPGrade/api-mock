@@ -1,0 +1,13 @@
+{
+  "response": {
+    "status": 200,
+    "body": {
+      "name": "Jim",
+      "age": 21
+    },
+    "headers": {
+      "random": "value",
+      "basic": "stuff"
+    }
+  }
+}
