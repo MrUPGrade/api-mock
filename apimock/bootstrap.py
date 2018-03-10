@@ -16,6 +16,7 @@ class Config:
     log_level = attr.ib()
     debug = attr.ib()
     mock_dir = attr.ib()
+    output_dir = attr.ib()
 
     def load_from_env(self):
         self.log_level = os.getenv('APIMOCK_LOG_LEVEL', self.log_level)
@@ -41,9 +42,14 @@ def bootstrap_api(cfg):
     if not mock_folder.is_absolute():
         mock_folder = Path(os.getcwd()) / mock_folder
 
+    output_folder = Path(cfg.output_dir)
+
+    if not output_folder.is_absolute():
+        output_folder = Path(os.getcwd()) / output_folder
+
     debug_log.debug('MOCK_PATH: %s', mock_folder)
 
-    sink = FolderBasedSink(mock_folder)
+    sink = FolderBasedSink(mock_folder, output_folder)
     api.add_sink(sink=sink, prefix='/')
 
     return api

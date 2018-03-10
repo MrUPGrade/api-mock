@@ -1,30 +1,34 @@
 import json
-from logging import getLogger
 import falcon
+import attr
 
-from apimock.response import SimpleResponseProcessor
+from logging import getLogger
+
+from apimock.request import RequestParser, SimpleRequestLogger
+from apimock.response import ResponseProcessorFactory
 
 debug_log = getLogger('debug')
 log = getLogger()
 
 
+@attr.s
 class FolderBasedSink:
-    def __init__(self, data_root):
-        self._data_root = data_root
+    _data_root = attr.ib()
+    _output_root = attr.ib()
 
-    def __call__(self, req, resp):
-        log.info('Processing request: %s', req.relative_uri)
+    def __call__(self, request, response):
+        log.info('Processing request: %s', request.relative_uri)
 
-        uri = req.relative_uri.rstrip(req.query_string).rstrip('?').lstrip('/')
-        debug_log.debug('URI: %s', uri or '/')
+        request_parser = RequestParser()
+        request_data = request_parser.process(request)
 
-        if uri:
-            path = self._data_root / uri
+        if request_data.uri:
+            path = self._data_root / request_data.uri
         else:
             path = self._data_root
             debug_log.debug('PATH: %s', path)
 
-        file_name = req.method.lower() + '.json'
+        file_name = request_data.method + '.json'
         debug_log.debug('FILE_NAME: %s', file_name)
 
         if not path.exists():
@@ -47,7 +51,11 @@ class FolderBasedSink:
         with file_path.open() as f:
             data = json.load(f)
 
-        response_data = data.get('response', dict())
+        request_logger = SimpleRequestLogger(self._output_root)
+        request_logger.process(request_data, request)
 
-        processor = SimpleResponseProcessor()
-        processor.process_response(resp, response_data)
+        mock_response_data = data.get('response', dict())
+        response_processor_name = data.get('response_type', 'simple')
+
+        processor = ResponseProcessorFactory.build(response_processor_name)
+        processor.process(response, mock_response_data)

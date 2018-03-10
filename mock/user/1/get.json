@@ -1,4 +1,5 @@
 {
+  "response_handler": "simple",
   "response": {
     "status": 200,
     "body": {

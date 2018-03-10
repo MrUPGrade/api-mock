@@ -1,0 +1,7 @@
+{
+  "request_logger": "simple",
+  "response": {
+    "body": {},
+    "status": 200
+  }
+}

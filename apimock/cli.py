@@ -16,5 +16,8 @@ LOG_LEVELS = ['CRITICAL', 'FATAL', 'ERROR', 'WARNING', 'WARN', 'INFO', 'DEBUG']
 @click.argument('mock_dir',
                 default='mock',
                 type=click.Path(exists=True))
+@click.argument('output_dir',
+                default='output',
+                type=click.Path(exists=False))
 def cli(**kwargs):
     run_app(kwargs)

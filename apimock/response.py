@@ -3,7 +3,7 @@ import logging
 
 
 class SimpleResponseProcessor:
-    def process_response(self, response, response_data):
+    def process(self, response, response_data):
         logging.debug('RESPONSE: %s', response_data)
         response_body = response_data.get('body')
 
@@ -17,3 +17,14 @@ class SimpleResponseProcessor:
         if headers:
             for key, value in headers.items():
                 response.append_header(key, value)
+
+
+class ResponseProcessorFactory:
+    RESPONSE_PROCESSOR_MAP = {
+        'simple': SimpleResponseProcessor
+    }
+
+    @classmethod
+    def build(cls, processor_name):
+        processor_class = cls.RESPONSE_PROCESSOR_MAP[processor_name]
+        return processor_class()
