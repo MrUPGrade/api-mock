@@ -5,11 +5,12 @@ import attr
 from pathlib import Path
 from logging import getLogger
 
-from apimock.request import RequestParser, SimpleRequestLogger
+from apimock.request import SimpleRequestLogger, RequestWrapper
 from apimock.response import ResponseProcessorFactory
 
 debug_log = getLogger('debug')
 log = getLogger()
+
 
 @attr.s
 class FolderScaner:
@@ -56,8 +57,8 @@ class FolderBasedSink:
     def __call__(self, request, response):
         log.info('Processing request: %s', request.relative_uri)
 
-        request_parser = RequestParser()
-        request_data = request_parser.process(request)
+        request_data = RequestWrapper.build(request)
+        debug_log.debug('URI: %s', request_data.uri or '/')
 
         scaner = FolderScaner(self._data_root)
         data = scaner.scan_or_raise(request_data.uri, request_data.method)
