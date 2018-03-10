@@ -2,6 +2,7 @@ import json
 import falcon
 import attr
 
+from pathlib import Path
 from logging import getLogger
 
 from apimock.request import RequestParser, SimpleRequestLogger
@@ -10,25 +11,18 @@ from apimock.response import ResponseProcessorFactory
 debug_log = getLogger('debug')
 log = getLogger()
 
-
 @attr.s
-class FolderBasedSink:
-    _data_root = attr.ib()
-    _output_root = attr.ib()
+class FolderScaner:
+    _data_root = attr.ib(validator=attr.validators.instance_of(Path))
 
-    def __call__(self, request, response):
-        log.info('Processing request: %s', request.relative_uri)
-
-        request_parser = RequestParser()
-        request_data = request_parser.process(request)
-
-        if request_data.uri:
-            path = self._data_root / request_data.uri
+    def scan_or_raise(self, uri, http_method):
+        if uri:
+            path = self._data_root / uri
         else:
             path = self._data_root
             debug_log.debug('PATH: %s', path)
 
-        file_name = request_data.method + '.json'
+        file_name = http_method + '.json'
         debug_log.debug('FILE_NAME: %s', file_name)
 
         if not path.exists():
@@ -51,11 +45,28 @@ class FolderBasedSink:
         with file_path.open() as f:
             data = json.load(f)
 
-        request_logger = SimpleRequestLogger(self._output_root)
-        request_logger.process(request_data, request)
+        return data
+
+
+@attr.s
+class FolderBasedSink:
+    _data_root = attr.ib()
+    _output_root = attr.ib()
+
+    def __call__(self, request, response):
+        log.info('Processing request: %s', request.relative_uri)
+
+        request_parser = RequestParser()
+        request_data = request_parser.process(request)
+
+        scaner = FolderScaner(self._data_root)
+        data = scaner.scan_or_raise(request_data.uri, request_data.method)
 
         mock_response_data = data.get('response', dict())
         response_processor_name = data.get('response_type', 'simple')
 
         processor = ResponseProcessorFactory.build(response_processor_name)
         processor.process(response, mock_response_data)
+
+        request_logger = SimpleRequestLogger(self._output_root)
+        request_logger.process(request_data, request)
