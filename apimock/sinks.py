@@ -68,5 +68,5 @@ class FolderBasedSink:
         processor = ResponseProcessorFactory.build(response_processor_name)
         processor.process(response, mock_response_data)
 
-        request_logger = SimpleRequestLogger(self._output_root)
-        request_logger.process(request_data, request)
+        req_log = SimpleRequestLogger(self._output_root)
+        req_log.process(request_data, mock_response_data)
