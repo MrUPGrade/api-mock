@@ -6,6 +6,13 @@ PWD := $(shell pwd)
 
 DOCKER_IMAGE_ARGS = -it -p 8080:8080 -v $(PWD)/mock/:/mock/ mrupgrade/api-mock:latest
 
+RM = rm -Rf -v
+
+clean:
+	$(RM) output/
+	find -iname *.pyc | xargs $(RM)
+	find -iname __pycache__ | xargs $(RM)
+
 docker-build:
 	$(DOCKER) build -t mrupgrade/api-mock:latest .
 
